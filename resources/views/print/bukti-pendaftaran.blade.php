@@ -406,12 +406,12 @@
         </div>
         <div class="ttd-box">
             <div class="ttd-label">Mengetahui,</div>
-            <div class="ttd-line">( _________________________ )</div>
+            <div class="ttd-line">Nalarasati Usman</div>
             <div class="ttd-jabatan">Sekretaris {{ $settings['org_name'] }}</div>
         </div>
         <div class="ttd-box">
             <div class="ttd-label">Menyetujui,</div>
-            <div class="ttd-line">( _________________________ )</div>
+            <div class="ttd-line">Tri Valdo Putra</div>
             <div class="ttd-jabatan">Ketua {{ $settings['org_name'] }}</div>
         </div>
     </div>
