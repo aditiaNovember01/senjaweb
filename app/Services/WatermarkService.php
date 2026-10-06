@@ -125,30 +125,18 @@ class WatermarkService
     }
 
     // ── Cari font TrueType ────────────────────────────────────────────────────
+    // Hanya cek path dalam folder project agar tidak kena batasan open_basedir
+    // di shared hosting. Letakkan font di storage/fonts/DejaVuSans.ttf
 
     private function findFont(): ?string
     {
-        $candidates = [
-            // Fonts bawaan dari project (simpan di resources/fonts/ jika ada)
-            base_path('resources/fonts/OpenSans-Regular.ttf'),
-            base_path('resources/fonts/Roboto-Regular.ttf'),
-            base_path('resources/fonts/DejaVuSans.ttf'),
-            // Linux system fonts
-            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-            '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-            '/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf',
-            // Windows system fonts (Laragon)
-            'C:/Windows/Fonts/arial.ttf',
-            'C:/Windows/Fonts/segoeui.ttf',
-            'C:/Windows/Fonts/calibri.ttf',
-        ];
+        $fontPath = storage_path('fonts/DejaVuSans.ttf');
 
-        foreach ($candidates as $path) {
-            if (file_exists($path)) {
-                return $path;
-            }
+        if (file_exists($fontPath)) {
+            return $fontPath;
         }
 
+        // Fallback: gunakan built-in GD (tanpa TTF)
         return null;
     }
 }
