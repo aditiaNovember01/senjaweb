@@ -423,22 +423,29 @@ function berandaAnggota() {
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             @forelse($divisis as $i => $divisi)
-                <div class="bg-white rounded-2xl p-6 card-hover border border-transparent hover:border-primary-100">
+                <a href="{{ route('keanggotaan.divisi', $divisi) }}"
+                   class="bg-white rounded-2xl p-6 card-hover border border-transparent hover:border-primary-100 hover:shadow-md transition-all duration-200 block group">
                     <div class="flex items-start justify-between mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center">
+                        <div class="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
                             <img src="{{ asset('assets/logo/logosenja.png') }}" alt="SENJA" class="w-8 h-8 object-contain">
                         </div>
                         <span class="text-xs bg-green-50 text-green-600 font-medium px-3 py-1 rounded-full">
                             {{ $divisi->anggotas_count }} Anggota
                         </span>
                     </div>
-                    <h3 class="font-headline font-semibold text-secondary-500 text-lg mb-2">
+                    <h3 class="font-headline font-semibold text-secondary-500 text-lg mb-2 group-hover:text-primary-500 transition-colors">
                         Divisi {{ $divisi->nama }}
                     </h3>
                     <p class="text-sm text-neutral-500 leading-relaxed">
                         {{ $divisi->deskripsi ?: 'Divisi '.$divisi->nama.' UKM SENJA.' }}
                     </p>
-                </div>
+                    <div class="mt-4 flex items-center gap-1 text-xs font-semibold text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Lihat Anggota
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
+                    </div>
+                </a>
             @empty
                 <div class="col-span-3 text-center py-12 text-neutral-400">
                     Belum ada divisi terdaftar.

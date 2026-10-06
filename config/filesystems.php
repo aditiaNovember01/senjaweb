@@ -47,6 +47,17 @@ return [
             'report' => false,
         ],
 
+        // Disk untuk server yang tidak support symlink (OLS/cPanel)
+        // Set FILESYSTEM_DISK=public_direct di .env server
+        'public_direct' => [
+            'driver' => 'local',
+            'root' => public_path('storage'),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

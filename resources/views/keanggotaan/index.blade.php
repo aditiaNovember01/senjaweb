@@ -89,8 +89,8 @@
                           text-sm text-secondary-500 placeholder-neutral-400 transition">
         </div>
 
-        {{-- Grid Anggota --}}
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {{-- Grid Anggota — foto diperbesar --}}
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
             @forelse($semuaAnggota as $anggota)
             @php
                 $jabatanAnggota = $anggota->pengurus->sortByDesc('id')->first()?->jabatan ?? '';
@@ -107,7 +107,7 @@
                     'foto'             => $anggota->foto_profil ? asset('storage/'.$anggota->foto_profil) : '',
                 ], JSON_HEX_QUOT | JSON_HEX_APOS);
             @endphp
-            <div class="anggota-card bg-[#f0f2f8] rounded-2xl p-4 text-center hover:shadow-md hover:scale-[1.02] transition-all duration-200 cursor-pointer"
+            <div class="anggota-card bg-white rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer border border-gray-100 group"
                  x-show="shouldShow(
                      '{{ strtolower($anggota->nama_lengkap) }}',
                      '{{ strtolower($anggota->nim) }}',
@@ -116,51 +116,59 @@
                  x-transition
                  @click="openModal({{ $biodataAnggota }})">
 
-                {{-- Avatar --}}
-                <div class="w-14 h-14 rounded-full mx-auto mb-3 overflow-hidden
+                {{-- Foto dengan overlay --}}
+                <div class="w-full aspect-[3/4] overflow-hidden relative
                             @if($anggota->status === 'Pembina') bg-gray-200
                             @elseif($anggota->status === 'Anggota Kehormatan') bg-blue-100
-                            @else bg-primary-100 @endif
-                            flex items-center justify-center">
+                            @else bg-primary-50 @endif">
                     @if($anggota->foto_profil)
                         <img src="{{ asset('storage/'.$anggota->foto_profil) }}"
                              alt="{{ $anggota->nama_lengkap }}"
-                             class="w-full h-full object-cover">
+                             class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300">
                     @else
-                        <svg class="w-8 h-8
-                            @if($anggota->status === 'Pembina') text-gray-400
-                            @elseif($anggota->status === 'Anggota Kehormatan') text-blue-400
-                            @else text-primary-400 @endif"
-                             fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-                        </svg>
+                        <div class="w-full h-full flex items-center justify-center">
+                            <svg class="w-20 h-20
+                                @if($anggota->status === 'Pembina') text-gray-300
+                                @elseif($anggota->status === 'Anggota Kehormatan') text-blue-200
+                                @else text-primary-200 @endif"
+                                 fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                            </svg>
+                        </div>
                     @endif
+
+                    {{-- Gradient overlay nama --}}
+                    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent pt-10 pb-3 px-3">
+                        <p class="text-white font-semibold text-sm leading-tight line-clamp-2 drop-shadow">
+                            {{ $anggota->nama_lengkap }}
+                        </p>
+                        @if($anggota->divisi)
+                        <p class="text-white/70 text-xs mt-0.5">{{ $anggota->divisi->nama }}</p>
+                        @endif
+                    </div>
+
+                    {{-- Status badge --}}
+                    <div class="absolute top-2 right-2">
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full shadow-sm
+                            @if($anggota->status === 'Pembina') bg-gray-700 text-white
+                            @elseif($anggota->status === 'Anggota Aktif') bg-green-500 text-white
+                            @elseif($anggota->status === 'Anggota Pasif') bg-yellow-400 text-white
+                            @elseif($anggota->status === 'Anggota Kehormatan') bg-blue-500 text-white
+                            @endif">
+                            {{ $anggota->status === 'Anggota Aktif' ? 'Aktif'
+                                : ($anggota->status === 'Anggota Pasif' ? 'Pasif'
+                                : ($anggota->status === 'Anggota Kehormatan' ? 'Kehormatan'
+                                : $anggota->status)) }}
+                        </span>
+                    </div>
                 </div>
 
-                <p class="font-headline font-semibold text-secondary-500 text-sm leading-tight line-clamp-2">
-                    {{ $anggota->nama_lengkap }}
-                </p>
-                <p class="text-xs text-neutral-400 mt-0.5">{{ $anggota->nim }}</p>
-
-                <span class="inline-block mt-2 text-xs font-medium px-2.5 py-0.5 rounded-full
-                    @if($anggota->status === 'Pembina') bg-gray-100 text-gray-600
-                    @elseif($anggota->status === 'Anggota Aktif') bg-green-100 text-green-600
-                    @elseif($anggota->status === 'Anggota Pasif') bg-yellow-100 text-yellow-700
-                    @elseif($anggota->status === 'Anggota Kehormatan') bg-blue-100 text-blue-600
-                    @endif">
-                    {{ $anggota->status }}
-                </span>
-
-                @if($anggota->divisi)
-                <p class="text-xs text-neutral-400 mt-1.5 flex items-center justify-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-primary-400 inline-block"></span>
-                    {{ $anggota->divisi->nama }}
-                </p>
-                @endif
-
-                @if($anggota->angkatan)
-                <p class="text-xs text-neutral-300 mt-0.5">{{ $anggota->angkatan->nama }}</p>
-                @endif
+                <div class="px-3 py-2.5">
+                    <p class="text-xs text-neutral-400">{{ $anggota->nim }}</p>
+                    @if($anggota->angkatan)
+                    <p class="text-xs text-neutral-300 mt-0.5">{{ $anggota->angkatan->nama }}</p>
+                    @endif
+                </div>
             </div>
             @empty
             <div class="col-span-5 py-16 text-center text-neutral-400">
@@ -337,30 +345,36 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-10">
             <p class="section-label justify-center">Distribusi Keanggotaan</p>
-            <h2 class="font-headline font-bold text-3xl text-secondary-500">Anggota Aktif per Divisi</h2>
+            <h2 class="font-headline font-bold text-3xl text-secondary-500">Distribusi Anggota per Divisi</h2>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach($anggotaPerDivisi as $divisi)
-            <div class="bg-white rounded-2xl p-6 flex items-center gap-5">
-                <div class="w-14 h-14 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
+            <a href="{{ route('keanggotaan.divisi', $divisi) }}"
+               class="bg-white rounded-2xl p-6 flex items-center gap-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+                <div class="w-14 h-14 rounded-xl bg-primary-50 group-hover:bg-primary-100 flex items-center justify-center shrink-0 transition-colors">
                     <img src="{{ asset('assets/logo/logosenja.png') }}" alt="SENJA" class="w-9 h-9 object-contain">
                 </div>
                 <div class="flex-1">
-                    <h3 class="font-headline font-semibold text-secondary-500">Divisi {{ $divisi->nama }}</h3>
+                    <h3 class="font-headline font-semibold text-secondary-500 group-hover:text-primary-500 transition-colors">
+                        Divisi {{ $divisi->nama }}
+                    </h3>
                     <div class="flex items-center gap-2 mt-1">
                         <div class="flex-1 bg-gray-100 rounded-full h-1.5">
                             @php
-                                $maxAnggota = $anggotaPerDivisi->max('anggota_aktif_count') ?: 1;
-                                $persen = ($divisi->anggota_aktif_count / $maxAnggota) * 100;
+                                $maxAnggota = $anggotaPerDivisi->max('anggotas_count') ?: 1;
+                                $persen = ($divisi->anggotas_count / $maxAnggota) * 100;
                             @endphp
-                            <div class="bg-primary-500 h-1.5 rounded-full" style="width: {{ $persen }}%"></div>
+                            <div class="bg-primary-500 h-1.5 rounded-full transition-all" style="width: {{ $persen }}%"></div>
                         </div>
-                        <span class="text-sm font-semibold text-primary-500 shrink-0">{{ $divisi->anggota_aktif_count }}</span>
+                        <span class="text-sm font-semibold text-primary-500 shrink-0">{{ $divisi->anggotas_count }}</span>
                     </div>
-                    <p class="text-xs text-neutral-400 mt-0.5">anggota aktif</p>
+                    <p class="text-xs text-neutral-400 mt-0.5">total anggota</p>
                 </div>
-            </div>
+                <svg class="w-4 h-4 text-neutral-300 group-hover:text-primary-400 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
             @endforeach
         </div>
     </div>

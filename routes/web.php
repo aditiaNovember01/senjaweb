@@ -21,6 +21,7 @@ Route::get('/galeri', [GaleriController::class, 'index'])->name('galeri.index');
 
 // Keanggotaan
 Route::get('/keanggotaan', [KeanggotaanController::class, 'index'])->name('keanggotaan.index');
+Route::get('/keanggotaan/divisi/{divisi}', [KeanggotaanController::class, 'divisi'])->name('keanggotaan.divisi');
 
 // Kegiatan publik
 Route::get('/kegiatan', [KegiatanPublikController::class, 'index'])->name('kegiatan.index');
