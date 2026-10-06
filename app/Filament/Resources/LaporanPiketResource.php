@@ -148,18 +148,15 @@ class LaporanPiketResource extends Resource
                 ->schema([
                     FileUpload::make('foto_bukti')
                         ->label('Foto Bukti Piket')
-                        ->helperText('Foto hanya bisa diambil langsung dari kamera (galeri dinonaktifkan).')
+                        ->helperText('Gunakan tombol kamera di bawah untuk mengambil foto dengan watermark otomatis.')
                         ->image()
                         ->imageResizeMode('contain')
-                        ->maxSize(5120)
+                        ->maxSize(10240)
                         ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                         ->directory('bukti-piket')
                         ->required()
                         ->columnSpanFull()
-                        ->extraInputAttributes([
-                            // Paksa ambil dari kamera belakang, nonaktifkan galeri
-                            'capture' => 'environment',
-                        ]),
+                        ->id('foto_bukti_input'),
 
                     Textarea::make('catatan')
                         ->label('Catatan (opsional)')

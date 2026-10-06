@@ -59,6 +59,109 @@
 
 </div>
 
+{{-- ── Kamera Custom dengan Watermark ──────────────────────────────────────── --}}
+<div x-data="piketKamera()"
+     x-init="initKamera()"
+     class="mb-6 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+
+    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+            <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                📸 Kamera Bukti Piket
+            </h3>
+            <p class="text-xs text-gray-500 mt-0.5">Foto akan otomatis mendapat watermark lokasi, tanggal, dan jam</p>
+        </div>
+        {{-- Status indikator --}}
+        <div x-show="fotoSiap" x-cloak
+             class="flex items-center gap-1.5 text-xs font-semibold text-green-600 bg-green-50 border border-green-200 px-3 py-1 rounded-full">
+            ✅ Foto siap
+        </div>
+    </div>
+
+    <div class="p-5">
+
+        {{-- Panel sebelum kamera dibuka --}}
+        <div x-show="!kameraAktif && !fotoSiap" class="text-center py-8">
+            <div class="w-16 h-16 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+            </div>
+            <p class="text-gray-600 font-medium text-sm mb-1">Ambil foto bukti piket</p>
+            <p class="text-gray-400 text-xs mb-5">Watermark lokasi + waktu akan ditambahkan otomatis</p>
+            <button type="button"
+                    @click="bukaKamera()"
+                    class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Buka Kamera
+            </button>
+
+            <div x-show="kameraError" x-cloak
+                 class="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs" x-text="kameraError">
+            </div>
+        </div>
+
+        {{-- Live viewfinder --}}
+        <div x-show="kameraAktif && !fotoSiap" x-cloak class="space-y-3">
+            <div class="relative rounded-xl overflow-hidden bg-black">
+                <video x-ref="videoEl"
+                       autoplay playsinline muted
+                       class="w-full max-h-[60vh] object-contain block"></video>
+
+                {{-- Watermark preview overlay (hanya tampilan, bukan gambar asli) --}}
+                <div class="absolute bottom-0 left-0 right-0 bg-black/55 px-3 py-2 text-white text-xs font-mono space-y-0.5 pointer-events-none">
+                    <div x-text="gpsText" class="opacity-90"></div>
+                    <div x-text="tglJamText" class="opacity-90"></div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button"
+                        @click="ambilFoto()"
+                        class="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm py-3 rounded-xl transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Ambil Foto
+                </button>
+                <button type="button"
+                        @click="ganti()"
+                        class="px-4 py-3 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 text-sm font-medium transition-colors">
+                    ✕ Tutup
+                </button>
+            </div>
+        </div>
+
+        {{-- Preview hasil foto + watermark --}}
+        <div x-show="fotoSiap" x-cloak class="space-y-3">
+            <div class="relative rounded-xl overflow-hidden bg-black">
+                <canvas x-ref="canvasEl"
+                        class="w-full max-h-[60vh] object-contain block"></canvas>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button"
+                        @click="ganti()"
+                        class="flex-1 flex items-center justify-center gap-2 border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium text-sm py-3 rounded-xl transition-colors">
+                    🔄 Ulangi Foto
+                </button>
+                <div class="flex-1 flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-700 font-semibold text-sm py-3 rounded-xl">
+                    ✅ Foto berhasil
+                </div>
+            </div>
+        </div>
+
+        {{-- Canvas tersembunyi untuk proses watermark --}}
+        <canvas x-ref="canvasHidden" class="hidden"></canvas>
+
+    </div>
+</div>
+
 {{-- ── Form — dikunci saat di luar radius ──────────────────────────────────── --}}
 <div :class="formBlocked ? 'pointer-events-none opacity-40 select-none' : ''"
      class="transition-opacity duration-300">
@@ -80,9 +183,10 @@
 
 </div>
 
-</div>{{-- /x-data --}}
+</div>{{-- /x-data piketGeo --}}
 
 <script>
+// ── GPS + radius logic ─────────────────────────────────────────────────────
 function piketGeo(cfg) {
     return {
         cfg,
@@ -93,10 +197,10 @@ function piketGeo(cfg) {
         lokasiValid: false,
 
         get formBlocked() {
-            if (!cfg.aktif)              return false;  // radius belum diset admin
-            if (this.status === 'denied') return false; // GPS ditolak — tetap izinkan tanpa lokasi
-            if (this.status !== 'ok')    return true;   // masih loading / error — block dulu
-            return !this.lokasiValid;                   // di luar radius — block
+            if (!cfg.aktif)               return false;
+            if (this.status === 'denied') return false;
+            if (this.status !== 'ok')     return true;
+            return !this.lokasiValid;
         },
 
         init() { this.ambilLokasi(); },
@@ -125,7 +229,7 @@ function piketGeo(cfg) {
                 this.lokasiValid = true;
             }
 
-            // Kirim ke Livewire server supaya PHP bisa validasi ulang & simpan
+            // Kirim ke Livewire server
             this.$nextTick(() => {
                 if (window.Livewire) {
                     window.Livewire.dispatch('geo-update', {
@@ -134,6 +238,12 @@ function piketGeo(cfg) {
                     });
                 }
             });
+
+            // Kasih info GPS ke komponen kamera
+            window._piketGps = {
+                lat: this.latitude,
+                lng: this.longitude,
+            };
         },
 
         onError(err) {
@@ -147,6 +257,192 @@ function piketGeo(cfg) {
             const dG  = rad(lng2 - lng1);
             const a   = Math.sin(dL/2)**2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dG/2)**2;
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+    };
+}
+
+// ── Kamera custom + Canvas watermark ─────────────────────────────────────────
+function piketKamera() {
+    return {
+        kameraAktif: false,
+        fotoSiap:    false,
+        kameraError: null,
+        stream:      null,
+        gpsText:     'Lokasi: menunggu GPS...',
+        tglJamText:  '',
+        clockTimer:  null,
+
+        initKamera() {
+            // Update jam setiap detik
+            this.updateJam();
+            this.clockTimer = setInterval(() => this.updateJam(), 1000);
+        },
+
+        updateJam() {
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const tgl = now.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
+            const jam = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} WIB`;
+            this.tglJamText = `📅 ${tgl}  🕐 ${jam}`;
+
+            const gps = window._piketGps;
+            if (gps) {
+                this.gpsText = `📍 ${gps.lat.toFixed(6)}, ${gps.lng.toFixed(6)}`;
+            } else {
+                this.gpsText = '📍 Lokasi: menunggu GPS...';
+            }
+        },
+
+        async bukaKamera() {
+            this.kameraError = null;
+            try {
+                // Coba kamera belakang dulu, fallback ke kamera manapun
+                let constraints = { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false };
+                try {
+                    this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch {
+                    this.stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                }
+                this.$refs.videoEl.srcObject = this.stream;
+                this.kameraAktif = true;
+            } catch (err) {
+                this.kameraError = `Kamera tidak bisa dibuka: ${err.message}. Pastikan izin kamera diberikan di browser.`;
+            }
+        },
+
+        ambilFoto() {
+            const video  = this.$refs.videoEl;
+            const canvas = this.$refs.canvasEl;
+            const hidden = this.$refs.canvasHidden;
+
+            const W = video.videoWidth  || 1280;
+            const H = video.videoHeight || 960;
+
+            // Render frame video ke hidden canvas (full resolusi)
+            hidden.width  = W;
+            hidden.height = H;
+            const hctx = hidden.getContext('2d');
+            hctx.drawImage(video, 0, 0, W, H);
+
+            // ── Watermark ──────────────────────────────────────────────────
+            const now   = new Date();
+            const pad   = n => String(n).padStart(2, '0');
+            const tgl   = now.toLocaleDateString('id-ID', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+            const jam   = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} WIB`;
+            const gps   = window._piketGps;
+            const lokasiStr = gps ? `${gps.lat.toFixed(6)}, ${gps.lng.toFixed(6)}` : 'Lokasi tidak tersedia';
+
+            const lines = [
+                `\uD83D\uDCCD ${lokasiStr}`,
+                `\uD83D\uDCC5 ${tgl}`,
+                `\uD83D\uDD50 ${jam}`,
+            ];
+
+            const fontSize  = Math.max(16, Math.round(W * 0.025));
+            const lineH     = fontSize + 10;
+            const stripH    = lineH * lines.length + 18;
+            const stripY    = H - stripH;
+
+            // Strip gelap semi-transparan
+            hctx.fillStyle = 'rgba(0,0,0,0.58)';
+            hctx.fillRect(0, stripY, W, stripH);
+
+            // Teks putih
+            hctx.font         = `bold ${fontSize}px "Arial", sans-serif`;
+            hctx.textBaseline = 'top';
+
+            lines.forEach((line, i) => {
+                const y = stripY + 10 + i * lineH;
+                // Shadow
+                hctx.fillStyle = 'rgba(0,0,0,0.7)';
+                hctx.fillText(line, 13, y + 1);
+                // Teks utama
+                hctx.fillStyle = '#ffffff';
+                hctx.fillText(line, 12, y);
+            });
+
+            // Salin ke canvas tampil (bisa beda ukuran layar)
+            canvas.width  = W;
+            canvas.height = H;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(hidden, 0, 0);
+
+            // Matikan stream kamera
+            if (this.stream) {
+                this.stream.getTracks().forEach(t => t.stop());
+                this.stream = null;
+            }
+            this.kameraAktif = false;
+            this.fotoSiap    = true;
+
+            // ── Inject foto ke Filament FileUpload ────────────────────────
+            hidden.toBlob(blob => {
+                const file = new File([blob], `bukti-piket-${Date.now()}.jpg`, { type: 'image/jpeg' });
+                this.injectKeFilament(file);
+            }, 'image/jpeg', 0.92);
+        },
+
+        injectKeFilament(file) {
+            // Cari semua input file di halaman (Filament FileUpload / Filepond)
+            const injected = this.cariDanInject(file);
+            if (!injected) {
+                // Coba lagi setelah Livewire selesai render
+                setTimeout(() => this.cariDanInject(file), 600);
+            }
+        },
+
+        cariDanInject(file) {
+            // FilePond menyimpan instance di elemen input
+            const inputs = document.querySelectorAll('input[type="file"]');
+            for (const input of inputs) {
+                // Coba lewat FilePond API
+                if (window.FilePond) {
+                    const fp = window.FilePond.find(input);
+                    if (fp) {
+                        fp.addFile(file);
+                        return true;
+                    }
+                }
+                // Fallback: DataTransfer
+                try {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    return true;
+                } catch (e) { /* lanjut */ }
+            }
+            return false;
+        },
+
+        ganti() {
+            // Reset
+            if (this.stream) {
+                this.stream.getTracks().forEach(t => t.stop());
+                this.stream = null;
+            }
+            this.kameraAktif = false;
+            this.fotoSiap    = false;
+            this.kameraError = null;
+
+            // Reset canvas
+            const c = this.$refs.canvasEl;
+            if (c) { const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height); }
+
+            // Reset FilePond / input file
+            const inputs = document.querySelectorAll('input[type="file"]');
+            for (const input of inputs) {
+                if (window.FilePond) {
+                    const fp = window.FilePond.find(input);
+                    if (fp) { fp.removeFiles(); continue; }
+                }
+                input.value = '';
+            }
+        },
+
+        destroy() {
+            if (this.stream) this.stream.getTracks().forEach(t => t.stop());
+            if (this.clockTimer) clearInterval(this.clockTimer);
         }
     };
 }
