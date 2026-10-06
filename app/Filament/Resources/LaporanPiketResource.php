@@ -142,21 +142,6 @@ class LaporanPiketResource extends Resource
                         ->disabled($canUpload && ! $isAdmin)
                         ->dehydrated(true)
                         ->searchable(),
-                ]),
-
-            Section::make('Bukti Foto')
-                ->schema([
-                    FileUpload::make('foto_bukti')
-                        ->label('Foto Bukti Piket')
-                        ->helperText('Gunakan tombol kamera di bawah untuk mengambil foto dengan watermark otomatis.')
-                        ->image()
-                        ->imageResizeMode('contain')
-                        ->maxSize(10240)
-                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                        ->directory('bukti-piket')
-                        ->required()
-                        ->columnSpanFull()
-                        ->id('foto_bukti_input'),
 
                     Textarea::make('catatan')
                         ->label('Catatan (opsional)')
@@ -164,9 +149,25 @@ class LaporanPiketResource extends Resource
                         ->nullable()
                         ->columnSpanFull(),
 
-                    // Hidden fields — diisi oleh JS geolocation di custom view
+                    // Hidden — diisi JS
                     Hidden::make('latitude'),
                     Hidden::make('longitude'),
+                ]),
+
+            // Section ini disembunyikan via CSS, tapi diperlukan agar Filament
+            // bisa menerima & menyimpan file foto_bukti dari kamera custom
+            Section::make('_foto')
+                ->hiddenLabel()
+                ->schema([
+                    FileUpload::make('foto_bukti')
+                        ->label('')
+                        ->image()
+                        ->maxSize(10240)
+                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                        ->directory('bukti-piket')
+                        ->required()
+                        ->columnSpanFull()
+                        ->extraAttributes(['data-piket-upload' => 'true']),
                 ]),
         ]);
     }
