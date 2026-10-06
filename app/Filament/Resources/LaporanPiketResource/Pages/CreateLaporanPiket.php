@@ -5,6 +5,7 @@ namespace App\Filament\Resources\LaporanPiketResource\Pages;
 use App\Filament\Resources\LaporanPiketResource;
 use App\Models\LaporanPiket;
 use App\Models\SiteSetting;
+use App\Services\WatermarkService;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
@@ -85,6 +86,27 @@ class CreateLaporanPiket extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
+    }
+
+    /**
+     * Setelah record tersimpan: tempel watermark lokasi + waktu ke foto.
+     */
+    protected function afterCreate(): void
+    {
+        $record = $this->record;
+
+        if (! $record?->foto_bukti) return;
+
+        app(WatermarkService::class)->apply(
+            storagePath: $record->foto_bukti,
+            latitude:    $record->latitude    !== null ? (float) $record->latitude    : null,
+            longitude:   $record->longitude   !== null ? (float) $record->longitude   : null,
+            uploadedAt:  $record->uploaded_at
+                            ? \Carbon\Carbon::parse($record->uploaded_at)
+                                ->timezone(config('app.timezone', 'Asia/Jakarta'))
+                                ->toDateTimeString()
+                            : null,
+        );
     }
 
     /**

@@ -7,6 +7,7 @@
                 <img src="{{ asset('assets/logo/logosenja.png') }}"
                      alt="UKM SENJA"
                      class="h-10 w-auto object-contain">
+                <span class="text-base font-bold text-secondary-500 tracking-wide leading-tight hidden sm:block">UKM SENJA</span>
             </a>
 
             {{-- Nav Links Desktop --}}
